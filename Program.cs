@@ -129,4 +129,48 @@ app.MapGet("/api/OrderDetails", (BangzonDbContext db, int oId) =>
 }
 );
 
+
+//Products
+//Delete a product
+app.MapDelete("/api/product/{id}", (BangzonDbContext db, int id) =>
+{
+    Product product = db.Products.SingleOrDefault(p => p.Id == id);
+    if (product == null)
+    {
+        return Results.NotFound();
+    }
+    db.Products.Remove(product);
+    db.SaveChanges();
+    return Results.NoContent();
+
+});
+//Update a product
+app.MapPut("/api/Products/{id}", (BangzonDbContext db, int id, Product product) =>
+{
+    Product productToUpdate = db.Products.SingleOrDefault(product => product.Id == id);
+    if (productToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    productToUpdate.ProductName = product.ProductName;
+    productToUpdate.ProductPrice = product.ProductPrice;
+    productToUpdate.ProductDescription = product.ProductDescription;
+
+    db.SaveChanges();
+    return Results.NoContent();
+});
+//View Seller's products
+app.MapGet("/api/sllersproducts/{userId}", (BangzonDbContext db, int id) =>
+{
+    var product = db.Products.Where(x => x.UserId == id).ToList();
+    return product;
+});
+//Add a product
+app.MapPost("/api/products", (BangzonDbContext db, Product product) =>
+{
+    db.Products.Add(product);
+    db.SaveChanges();
+    return Results.Created($"/api/products/{product.Id}", product);
+});
+
 app.Run();
