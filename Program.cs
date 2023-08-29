@@ -173,4 +173,48 @@ app.MapPost("/api/products", (BangzonDbContext db, Product product) =>
     return Results.Created($"/api/products/{product.Id}", product);
 });
 
+//Users
+//Get user by id
+app.MapGet("/api/user/{id}", (BangzonDbContext db, int id) =>
+{
+    var user= db.Users.Single(u => u.Id == id);
+    return user;
+});
+
+//Create a User
+app.MapPost("/api/user", (BangzonDbContext db, User user) =>
+{
+    db.Users.Add(user);
+    db.SaveChanges();
+    return Results.Created($"/api/user/{user.Id}", user);
+});
+
+//Delete a User
+app.MapDelete("/api/user/{id}", (BangzonDbContext db, int id) =>
+{
+    User user = db.Users.SingleOrDefault(u => u.Id == id);
+    if (user == null)
+    {
+        return Results.NotFound();
+    }
+    db.Users.Remove(user);
+    db.SaveChanges();
+    return Results.NoContent();
+
+});
+
+//Update a User
+app.MapPut("/api/user/{id}", (BangzonDbContext db, User user, int id) =>
+{
+    User userToUpdate = db.Users.SingleOrDefault(u => u.Id == id);
+    if (userToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    userToUpdate.UserName = user.UserName;
+    userToUpdate.IsSeller = user.IsSeller;
+
+    db.SaveChanges();
+    return Results.Created($"/api/user/{user.Id}", user);
+});
 app.Run();
