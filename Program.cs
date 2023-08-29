@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
 using System.Linq;
 using System.Dynamic;
+using System.Runtime.CompilerServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,83 +63,70 @@ app.MapPost("/api/Order", (BangzonDbContext db, int oId, int pId) =>
 
     });
 
-app.MapPost("/api/Orderlist", (BangzonDbContext db, int oId, List<int> pIds) =>
+
+//Orders 
+//View an Order with Products
+app.MapGet("/api/Orders", (BangzonDbContext db, int id) =>
+{
+    var orders = db.Orders.Where(o => o.Id == id).Include(x => x.Products).FirstOrDefault();
+
+    return orders;
+ }
+);
+//Delete an Order
+app.MapDelete("/api/order/{id}", (BangzonDbContext db, int id) =>
+{
+    Order order = db.Orders.SingleOrDefault(o => o.Id == id);
+    if (order == null)
     {
-        var getOrder = db.Orders.FirstOrDefault(o => o.Id == oId);
-        var listProductIds = db.Products.Where(p => pIds.Contains(p.Id)).ToList();
-        if (getOrder.Products == null)
-        {
-            getOrder.Products = new List<Product>();
-        }
-        foreach ( var productId in listProductIds)
-        {
-            getOrder.Products.Add(productId);
-        }
+        return Results.NotFound();
+    }
+    db.Orders.Remove(order);
+    db.SaveChanges();
+    return Results.NoContent();
 
-      
-           
-            db.SaveChanges();
-            return getOrder;
+});
 
-
-    });
-
-//app.MapGet("/api/Orders/{id}", (BangzonDbContext db, int id) =>
-//{
-//    var products = db.OrderProducts
-//    .Where(po => po.OrderId == id)
-//    .SelectMany(po => db.Products.Where(p => p.Id == po.ProductId))
-//    .ToList();
-//    return products;
-//});
-
-//app.MapGet("/api/Orders/{id}", (BangzonDbContext db, int id) =>
-//{
-//    var test = db.Orders
-//    .Where(o => o.Id == id)
-//    .Select(o => new
-//    {
-//        Order = o,
-//        Products = db.OrderProducts
-//        .Where(op => op.OrderId == id)
-//        .SelectMany(op => db.Products.Where(p => p.Id == op.ProductId))
-//        .ToList()
-//    })
-//    .FirstOrDefault();
-
-
-//    return test;
-//});
-
-//app.MapGet("/api/Orders/{id}", (BangzonDbContext db, int id) =>
-//{
-//    var test = db.Orders
-//    .Include(o =>o.OrderProducts)
-//    .ThenInclude(op => op.Products)
-//    .SingleOrDefault(o=>o.Id == id);
-//    if (test != null)
-//    {
-//        var products =
-//        test.OrderProducts.Select
-//        (x => x.Product).ToList();
-//        return products;
-//    }
-
-//    return test;
-//});
+//Create an Order with products
+app.MapPost("/api/Orderlist", (BangzonDbContext db, int oId, List<int> pIds) =>
+{
+    var getOrder = db.Orders.FirstOrDefault(o => o.Id == oId);
+    var listProductIds = db.Products.Where(p => pIds.Contains(p.Id)).ToList();
+    if (getOrder.Products == null)
+    {
+        getOrder.Products = new List<Product>();
+    }
+    foreach (var productId in listProductIds)
+    {
+        getOrder.Products.Add(productId);
+    }
 
 
 
+    db.SaveChanges();
+    return getOrder;
 
-//app.MapGet("/OrderProduct/{id}", (int id) =>
-//{
-//    ServiceTicket serviceTicket = serviceTicketsList.FirstOrDefault(st => st.Id == id);
-//    if (serviceTicket == null)
-//    {
-//        return Results.NotFound();
-//    }
-//    serviceTicket.Employee = employeeList.FirstOrDefault(e => e.Id == serviceTicket.EmployeeId);
-//    serviceTicket.Customer = customerList.FirstOrDefault(e => e.Id == serviceTicket.CustomerId);
-//    return Results.Ok(serviceTicket);
-//});
+
+});
+//Update an Order
+app.MapPut("/api/Order/{id}", (BangzonDbContext db, int id, Order order) =>
+{
+    Order OrderToUpdate = db.Orders.SingleOrDefault(order => order.Id == id);
+    if (OrderToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    OrderToUpdate.OrderStatusId = order.OrderStatusId;
+
+    db.SaveChanges();
+    return Results.NoContent();
+});
+//View an Order
+app.MapGet("/api/OrderDetails", (BangzonDbContext db, int oId) =>
+{
+    var getOrder = db.Orders.FirstOrDefault(o => o.Id == oId);
+    return getOrder;
+}
+);
+
 app.Run();
