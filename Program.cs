@@ -27,7 +27,23 @@ builder.Services.Configure<JsonOptions>(options =>
     options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000",
+                                "http://localhost:5169")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
+
+
+//Add for Cors 
+app.UseCors();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -37,6 +53,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
+//ADD CORS (under Using statements)
 
 app.MapControllers();
 
@@ -216,5 +233,19 @@ app.MapPut("/api/user/{id}", (BangzonDbContext db, User user, int id) =>
 
     db.SaveChanges();
     return Results.Created($"/api/user/{user.Id}", user);
+});
+
+
+app.MapGet("/checkuser/{uid}", (BangzonDbContext db, string uid) =>
+{
+    var user = db.Users.Where(x => x.uid == uid).ToList();
+    if(uid == null)
+    {
+        return Results.NotFound();
+    }
+    else
+    {
+        return Results.Ok (user);
+    }
 });
 app.Run();

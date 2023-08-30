@@ -22,10 +22,10 @@ public class BangzonDbContext : DbContext
         // seed data with Users
         modelBuilder.Entity<User>().HasData(new User[]
         {
-        new User {Id = 1, UserName = "Jack Smith", IsSeller = true},
-        new User {Id = 2, UserName = "Chris Lee", IsSeller = false},
-        new User {Id = 3, UserName = "Steve Wilson", IsSeller = false},
-        new User {Id = 4, UserName = "Mike Larry", IsSeller = true},
+        new User {Id = 1, UserName = "Jack Smith", uid="4d56asd6", IsSeller = true},
+        new User {Id = 2, UserName = "Chris Lee", uid="4d56asd6sareq",IsSeller = false},
+        new User {Id = 3, UserName = "Steve Wilson",uid="4d56asd6das", IsSeller = false},
+        new User {Id = 4, UserName = "Mike Larry",uid="sa02asd", IsSeller = true},
 
         });
 
